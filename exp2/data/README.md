@@ -1,4 +1,4 @@
-# Description of data format for Experiment 1
+# Description of data format for Experiment 2
 
 ## `data.csv`
 
