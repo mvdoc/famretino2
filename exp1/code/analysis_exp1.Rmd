@@ -9,9 +9,9 @@ Start by loading functions and data
 ```{r, message=FALSE, warning=FALSE}
 require(latex2exp)
 require(bootES)
+require(plyr)
 require(tidyverse)
 require(assertthat)
-require(plyr)
 df <- read_csv('../data/data.csv')
 df$pos <- as.factor(df$pos)
 df$session <- as.factor(df$session)
