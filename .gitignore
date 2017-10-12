@@ -3,5 +3,6 @@
 .RData
 .Ruserdata
 packrat/lib*/
+packrat/src/
 .DS_Store
 */img/*
