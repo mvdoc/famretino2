@@ -13,6 +13,6 @@
 - `ecc`: eccentricity of the stimulus in degrees of visual angle; always
   7 in this experiment
 - `rt`: reaction time
-- `response`: subject response, one of {'LeftArrow', 'RightArrow'},
-  corresponding to identities {'a', 'b'}
+- `response`: subject response, one of `{'LeftArrow', 'RightArrow'}`,
+  corresponding to identities `{'a', 'b'}`
 - `response_bin`: binarized response
