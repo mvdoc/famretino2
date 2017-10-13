@@ -1,8 +1,10 @@
 ---
 title: "Experiment 1"
-output: 
+output:
+  pdf_document:
+    toc: yes
   html_notebook:
-    toc: true
+    toc: yes
 ---
 
 Start by loading functions and data
