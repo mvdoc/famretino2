@@ -1,8 +1,10 @@
-# Analysis scripts and data for "THE TITLE"
+# Idiosyncratic, retinotopic bias in face identification modulated by personal familiarity
 
-This repository contains the analysis scripts and raw data for "The
-Title", by Matteo Visconti di Oleggio Castello, Morgan Taylor, Patrick
-Cavanagh, and M.  Ida Gobbini. A preprint is available at XXX.
+This repository contains the analysis scripts and raw data for
+*Idiosyncratic, retinotopic bias in face identification modulated by
+personal familiarity* by Matteo Visconti di Oleggio Castello, Morgan
+Taylor, Patrick Cavanagh, and M.  Ida Gobbini. A preprint is available
+at XXX.  
 
 All the analysis are provided as RMarkdown notebooks; a converted HTML
 version is already present in the directory that can be inspected using

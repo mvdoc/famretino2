@@ -905,9 +905,175 @@ ggplot(aes(contact, psescore, color=morph_type), data=partial_score) +
 ggsave('../img/psequest_scatter_psecontact_fam.png', width=3, height=3)
 ```
 
+# PSE for individual identities
+
+We are going to evaluate the bias towards specific identities,
+instead of pairs of morphs. To do so, we'll fit a linear model predicting the
+PSE, taking the data of each pair of morphs containing the same identity. For
+example, to evaluate the bias for identity `a`, we'll consider the PSE
+estimates for morphs `ab` and `ac` across the two sessions, and fit a linear
+model with participants, angular location, and their interaction as predictors.
+
+```{r message=FALSE, warning=FALSE}
+require(tidyverse)
+require(lme4)
+require(car)
+require(broom)
+```
+
+First we compute the PSE for each participant by adding PSEp and DPSE.
+```{r}
+cols <- c('pos1', 'pos3', 'pos5', 'pos7')
+pse_ses1 = list()
+pse_ses2 = list()
+
+# compute the PSE by adding PSEp to DPSE for each subject
+for (morph in c('ac', 'ab', 'bc')) {
+  psep <- psep_ses1[[morph]]
+  dpse <- dpse_ses1[[morph]]
+  pse <- (matrix(rep(psep[cols], 10), nrow=10, byrow=T) + 
+                       dpse[cols])*100 + 50
+  pse$subject <- row.names(pse)
+  pse_ses1[[morph]] <- pse
+  
+  psep <- psep_ses2[[morph]]
+  dpse <- dpse_ses2[[morph]]
+  pse <- (matrix(rep(psep[cols], 10), nrow=10, byrow=T) + 
+                       dpse[cols])*100 + 50
+  pse$subject <- row.names(pse)
+  pse_ses2[[morph]] <- pse
+}
+
+# now store it in long format
+pse_ses1_long <-
+  ldply(
+    lapply(pse_ses1, function(x) mutate(x, subject=rownames(x)) %>% gather(pos, pse, -subject)),
+    data.frame) %>%
+  mutate(morph_type=.id, session='1')
+pse_ses2_long <-
+  ldply(
+    lapply(pse_ses2, function(x) mutate(x, subject=rownames(x)) %>% gather(pos, pse, -subject)),
+    data.frame) %>%
+  mutate(morph_type=.id, session='2')
+
+pse <- 
+  rbind(pse_ses1_long, pse_ses2_long) %>%
+  mutate(pos_num=mapvalues(pos, 
+                           paste('pos', c(1, 3, 5, 7), sep=''), 
+                           c(1, 3, 5, 7)*45))
+pse$pos_num <- factor(pse$pos_num, levels=c(1, 3, 5, 7)*45)
+```
+
+Let's save it for later use.
+```{r}
+# save pse
+pse_fn <- '../derivatives/pse.csv'
+
+if (!file.exists(pse_fn)) {
+  pse_ <- pse %>%
+    select(subject, session, morph_type, pos_num, pse)
+  write_csv(pse_, pse_fn)
+}
+```
 
 
+Here we load the pre-estimated data
+```{r}
+pse <- read_csv('../derivatives/pse.csv', col_types='ciccd')
+pse$morph_type <- as.factor(pse$morph_type)
+pse$pos_num <- factor(pse$pos_num, 
+                      levels=c('45', '135', '225', '315'))
+```
 
+
+We set up a function to filter the data for each individual identity. Moreover,
+we make sure that the PSE value indicates consistently the bias with respect to
+the same identity.
+```{r}
+filter_dataset <- function(id, df) {
+  identity2morphs <- list(a=c('ab', 'ac'),
+                          b=c('ab', 'bc'),
+                          c=c('bc', 'ac'))
+  df_ <-
+    df %>%
+    filter(morph_type %in% identity2morphs[[id]]) %>%
+    droplevels(.$morph_type)
+  
+  # put the PSE in the right order: > 50 indicates 
+  # more towards the identity of interest
+  if (id == 'b') {
+    df_ <-
+    df_ %>%
+      mutate(pse=ifelse(morph_type == 'ab', 100 - pse, pse))
+  } else if (id == 'c') {
+    df_ <-
+    df_ %>%
+      mutate(pse=100 - pse)
+  }
+  
+  return(df_)
+}
+```
+
+
+Finally we can fit the models
+```{r}
+ids <- c('a', 'b', 'c')
+# split the datasets
+pse_ids <- map(ids, filter_dataset, pse)
+
+fit_model <- function(df) {
+  df$subject <- as.factor(df$subject)
+  df$pos_num <- as.factor(df$pos_num)
+  contrasts(df$subject) <- contr.sum(length(unique(df$subject)))
+  contrasts(df$pos_num) <- contr.sum(length(unique(df$pos_num)))
+  
+  return(lm(pse ~ subject * pos_num, data=df))
+}
+
+model_ids <- 
+  map(pse_ids, fit_model) %>%
+  set_names(ids)
+
+anova_model <-
+  model_ids %>%
+  map(Anova, type=3)
+
+tidy_anova <-
+  anova_model %>%
+  map_df(tidy, .id='id')
+```
+
+And here are the results
+```{r}
+anova_model
+```
+We find a significant interaction between participants and angular location for
+identities `b` and `c`, but not for identity `a`, suggesting that for identity
+`a` the bias is consistently more homogeneous across participants.
+
+## Use the model to predict the biases
+
+We can also use these models now to predict the biases at each angular location
+for each individual participant.
+
+```{r}
+df_pred <- expand.grid(
+  subject=unique(pse$subject),
+  pos_num=unique(pse$pos_num)
+)
+
+df_pred <- 
+map_df(model_ids, predict, df_pred) %>%
+  gather(identity, pse) %>%
+  cbind(df_pred, .)
+```
+```{r}
+ggplot(aes(pos_num, pse-50, color=subject, group=subject), data=df_pred) +
+  geom_point() +
+  geom_line() +
+  facet_wrap(~identity, nrow=1)
+```
 
 
 
