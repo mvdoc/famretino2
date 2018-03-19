@@ -15,6 +15,7 @@ require(bootES)
 require(plyr)
 require(tidyverse)
 require(assertthat)
+require(broom)
 df <- read_csv('../data/data.csv')
 
 # create output img directory if not existant
@@ -815,6 +816,14 @@ summary(m2)
 require(heplots)
 round(etasq(m1), 2)
 round(etasq(m2), 2)
+
+# compute log-likelihood ratio manually
+m1_loglik <- logLik(m1)
+m2_loglik <- logLik(m2)
+lr <- as.numeric(2 * (m2_loglik - m1_loglik))
+plr <- pchisq(lr, 1, lower.tail=F)
+
+print(paste("Log-likelihood ratio:", lr, "pvalue:", plr))
 ```
 ```{r}
 # from http://www.statmethods.net/advstats/bootstrapping.html
