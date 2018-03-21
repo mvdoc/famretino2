@@ -483,45 +483,52 @@ ggsave('../img/dpse_subjects.png', width=8, height=3)
 ```
 Let's also plot an example fit for subject s10
 ```{r}
-# get the data to plot individual points
-df_s10_plot_ab <-
-  df %>%
-  filter(subject == 's10', session == '1') %>%
-  filter(morph_type == 'ab', pos_num %in% c('225', '315'))
-df_s10_plot_ac <-
-  df %>%
-  filter(subject == 's10', session == '1') %>%
-  filter(morph_type == 'ac', pos_num %in% c('135', '315'))
-df_s10_plot_bc <-
-  df %>%
-  filter(subject == 's10', session == '1') %>%
-  filter(morph_type == 'bc', pos_num %in% c('135', '315'))
-
-df_s10_plot <-
-  rbind(df_s10_plot_ab, df_s10_plot_ac, df_s10_plot_bc)
-
-# now get the pse values to plot
-psep1_plot <-
-psep %>% 
-  filter(session == '1') %>%
-  arrange(pos, morph_type)
-dpse1_plot <-
-dpse %>% 
-  filter(subject == 's10', session == '1') %>% 
-  arrange(pos, morph_type) %>%
-  mutate(dpse=pse) %>%
-  select(morph_type, pos, pos_num, dpse)
-
-pse_s10_plot <- merge(psep1_plot, dpse1_plot)
-pse_s10_plot <-
-pse_s10_plot %>%
-  mutate(tpse=(pse+dpse)*100+50)
+pse_s10 <- list()
+df_s10 <- list()
+for (ses in c('1', '2')) {
+  # get the data to plot individual points
+  df_s10_plot_ab <-
+    df %>%
+    filter(subject == 's10', session == ses) %>%
+    filter(morph_type == 'ab', pos_num %in% c('225', '315'))
+  df_s10_plot_ac <-
+    df %>%
+    filter(subject == 's10', session == ses) %>%
+    filter(morph_type == 'ac', pos_num %in% c('135', '315'))
+  df_s10_plot_bc <-
+    df %>%
+    filter(subject == 's10', session == ses) %>%
+    filter(morph_type == 'bc', pos_num %in% c('135', '315'))
+  
+  df_s10_plot <-
+    rbind(df_s10_plot_ab, df_s10_plot_ac, df_s10_plot_bc)
+  
+  # now get the pse values to plot
+  psep1_plot <-
+  psep %>% 
+    filter(session == ses) %>%
+    arrange(pos, morph_type)
+  dpse1_plot <-
+  dpse %>% 
+    filter(subject == 's10', session == ses) %>% 
+    arrange(pos, morph_type) %>%
+    mutate(dpse=pse) %>%
+    select(morph_type, pos, pos_num, dpse)
+  
+  pse_s10_plot <- merge(psep1_plot, dpse1_plot)
+  pse_s10_plot <-
+  pse_s10_plot %>%
+    mutate(tpse=(pse+dpse)*100+50)
+  pse_s10[[ses]] <- pse_s10_plot
+  df_s10[[ses]] <- df_s10_plot
+}
 ```
 ```{r, fig.height=6, fig.width=8}
+for (ses in c('1', '2')) {
 predict_subj %>%
-  filter(subject == 's10', session == '1') %>%
+  filter(subject == 's10', session == ses) %>%
   ggplot(aes(morph_resc*100 + 50, pred*100, color=as.factor(pos_num))) +
-  geom_segment(aes(x=tpse, xend=tpse, y=-10, yend=50), alpha=0.8, linetype='dashed', data=pse_s10_plot) +
+  geom_segment(aes(x=tpse, xend=tpse, y=-10, yend=50), alpha=0.8, linetype='dashed', data=pse_s10[[ses]]) +
   geom_line() +
   facet_wrap(~morph_type, ncol=1) +
   coord_equal(ylim=c(-0.4, 101)) +
@@ -533,8 +540,9 @@ predict_subj %>%
         legend.title=element_text(size=10)) +
   labs(x='Percentage morphing', y='Percentage responses to\nsecond identity', color='Angular\nlocation') +
   stat_summary(aes(morph, response_bin), fun.y=function(x) sum(x)/length(x)*100, geom='point', 
-               data=df_s10_plot, size=0.9, show.legend=F)
-ggsave('../img/examplefit_s10.png', width=8, height=6)
+               data=df_s10[[ses]], size=0.9, show.legend=F)
+ggsave(paste('../img/examplefit_s10', '_ses', ses, '.png', sep=''), width=8, height=6)
+}
 ```
 
 Correlation of subject-level estimates across sessions

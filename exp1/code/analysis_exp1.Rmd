@@ -502,12 +502,17 @@ cor_ses12_long %>% filter(type == 'between') %>% bootES(data.col='corr', R=10000
 Let's make some plots to show the difference in psychometric curves for each subject
 
 ```{r, fig.height=5, fig.width=5}
-plot_examplefit_ses2 <- function(which_subj, extreme_curves=NULL) {
-  pse_subj_ses2 <- 
-    dpse_ses2 + matrix(rep(psep_ses2, nrow(dpse_ses2)), byrow=T, nrow=nrow(dpse_ses2)) 
+pse_subj <- list()
+pse_subj[[1]] <-  dpse_ses1 + matrix(rep(psep_ses1, nrow(dpse_ses1)), 
+                                     byrow=T, nrow=nrow(dpse_ses1)) 
+pse_subj[[2]] <-  dpse_ses2 + matrix(rep(psep_ses2, nrow(dpse_ses2)), 
+                                     byrow=T, nrow=nrow(dpse_ses2)) 
+
+plot_examplefit <- function(which_subj, ses=2, extreme_curves=NULL) {
+  pse_subj_ses  <- pse_subj[[ses]]
   
-  pse_subj_ses2 <-
-  pse_subj_ses2 %>%
+  pse_subj_ses <-
+  pse_subj_ses %>%
     mutate(subject=row.names(.)) %>%
     gather(pos, pse, -subject) %>%
     mutate(pse=pse*100 + 50,
@@ -523,11 +528,11 @@ plot_examplefit_ses2 <- function(which_subj, extreme_curves=NULL) {
   
   predict_subj$pos_num <-
     factor(predict_subj$pos_num, levels=seq(0, 7)*45)
-  pse_subj_ses2$pos_num <-
-    factor(pse_subj_ses2$pos_num, levels=seq(0, 7)*45)
+  pse_subj_ses$pos_num <-
+    factor(pse_subj_ses$pos_num, levels=seq(0, 7)*45)
   
   df_plot <- df %>%
-    filter(subject == which_subj, session == '2') 
+    filter(subject == which_subj, session == as.character(ses)) 
   df_plot$pos_num <- 
     factor(df_plot$pos_num, levels=seq(0, 7)*45)
   
@@ -541,9 +546,9 @@ plot_examplefit_ses2 <- function(which_subj, extreme_curves=NULL) {
   # plot
   plot <-
   predict_subj %>%
-    filter(subject == which_subj, session == '2') %>%
+    filter(subject == which_subj, session == as.character(ses)) %>%
     ggplot(aes((morph_resc*100)+50, pred*100, color=pos_num)) +
-    geom_segment(aes(x=pse, xend=pse, y=-10, yend=50), alpha=0.8, linetype='dashed', data=pse_subj_ses2) +
+    geom_segment(aes(x=pse, xend=pse, y=-10, yend=50), alpha=0.8, linetype='dashed', data=pse_subj_ses) +
     geom_line(size=0.8) +
     theme_Publication() +
     coord_equal(ylim=c(-0.4, 101)) +
@@ -569,9 +574,11 @@ extreme_values <- list(
 
 
 ```{r, fig.height=5, fig.width=5}
-for (s in subjects) {
-  plot <- plot_examplefit_ses2(s, extreme_values[[s]])
-  ggsave(paste('../img/example_fit_', s, '.png', sep=''),
-         width=5, height=5)
+for (ses in 1:2) {
+  for (s in subjects) {
+    plot <- plot_examplefit(s, ses, extreme_values[[s]])
+    ggsave(paste('../img/example_fit_', s, '_ses', ses, '.png', sep=''),
+           width=5, height=5)
+  }
 }
 ```
