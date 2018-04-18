@@ -1,14 +1,17 @@
-# Idiosyncratic, retinotopic bias in face identification modulated by personal familiarity
+# Idiosyncratic, retinotopic bias in face identification modulated by familiarity
 
-This repository contains the analysis scripts and raw data for
+This repository contains the analysis scripts, raw data, and simulations  for
 *Idiosyncratic, retinotopic bias in face identification modulated by
 personal familiarity* by Matteo Visconti di Oleggio Castello, Morgan
-Taylor, Patrick Cavanagh, and M.  Ida Gobbini. A preprint is available
-at XXX.  
+Taylor, Patrick Cavanagh, and M. Ida Gobbini. A preprint is available
+at [here](https://www.biorxiv.org/content/early/2018/01/26/253468).
 
 All the analysis are provided as RMarkdown notebooks; a converted HTML
 version is already present in the directory that can be inspected using
 a regular browser.
+
+Simulations are provided as Jupyter notebook. Please read the README.md
+file in the model directory for more information.
 
 This repository uses [packrat](https://rstudio.github.io/packrat/) to
 track dependencies. If you open RStudio to the top directory of this
