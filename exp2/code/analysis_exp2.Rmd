@@ -709,6 +709,14 @@ df_quest %>%
   # Let's make a composite score by averaging ios, wescale, sci1, sci2
   mutate(compscore=mean(c(ios, wescale, sci1, sci2)))
 ```
+
+Compute correlations across scales to check how consistent they are
+
+```{r}
+tidy(round(cor(df_quest[c('ios', 'wescale', 'sci1', 'sci2')]), 2))
+min(cor(df_quest[c('ios', 'wescale', 'sci1', 'sci2')]))
+```
+
 Let's start simply by looking at the average values for each id
 ```{r}
 df_quest_long <-
