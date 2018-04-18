@@ -1,0 +1,195 @@
+---
+title: "Plotting modeling results"
+output: html_notebook
+---
+```{r message=FALSE, warning=FALSE}
+require(tidyverse)
+```
+
+```{r}
+df <- read_csv('outputs/sim_varvox_7gain_rois.csv')
+df$ratio <- as.factor(df$ratio)
+df <- df %>% group_by(ratio, roi, gain) %>% select(-X1)
+```
+
+# generate bootstrapped values for median and cis
+```{r message=FALSE, warning=FALSE, include=FALSE}
+# run in batches to reduce memory footprint
+batches <- 5
+nbs <- 1000
+nbs_batch <- nbs / batches
+set.seed(154254)
+df_bs <- list()
+for (batch in 1:batches) {
+  df_batch <- df %>% do(rs=modelr::bootstrap(., nbs_batch)) %>%
+    group_by(ratio, roi, gain) %>%
+    unnest() %>%
+    group_by(ratio, roi, gain, .id) %>%
+    do(as.data.frame(.$strap)) %>%
+    summarise(value=median(value))
+  df_batch$.id <- as.numeric(df_batch$.id) + nbs_batch * (batch - 1)
+  df_bs <- rbind(df_bs, df_batch)
+}
+```
+
+```{r}
+ci <- 68
+l_ci <- (100 - 68)/200
+h_ci <- 1 - l_ci
+cis <-
+df_bs %>%
+  ungroup() %>%
+  group_by(ratio, roi, gain) %>%
+  summarise(lo=quantile(value, l_ci),
+            hi=quantile(value, h_ci))
+
+df_t0 <-
+  df %>%
+  group_by(ratio, roi, gain) %>%
+  summarise(value=median(value))
+
+df_t0 <-
+df_t0 %>%
+  merge(cis)
+```
+
+```{r}
+df_t0$roi <- factor(df_t0$roi, levels=c('IOG', 'pFus', 'mFus'))
+```
+
+```{r}
+theme_Publication <- function(base_size=12) {
+      library(ggthemes)
+      (theme_foundation(base_size=base_size)
+       + theme(plot.title = element_text(face = "bold",
+                                         size = rel(1.2), hjust = 0.5),
+               text = element_text(),
+               panel.background = element_rect(colour = NA),
+               plot.background = element_rect(colour = NA),
+               panel.border = element_rect(colour = NA),
+               axis.title = element_text(size = rel(1)),
+               axis.title.y = element_text(angle=90,vjust =2),
+               axis.title.x = element_text(vjust = -0.2),
+               axis.text = element_text(), 
+               axis.line = element_line(colour="black"),
+               axis.ticks = element_line(),
+               panel.grid.major = element_blank(), #element_line(colour="#f0f0f0"),
+               panel.grid.minor = element_blank(),
+               legend.key = element_rect(colour = NA),
+               legend.position = "bottom",
+               legend.direction = "horizontal",
+               #legend.key.size= unit(0.2, "cm"),
+               legend.spacing = unit(0, "cm"),
+               legend.title = element_text(),
+               plot.margin = unit(c(10,5,5,5),"mm"),
+               strip.background = element_rect(colour="#f0f0f0",fill="#f0f0f0"),
+               strip.text = element_text(face="bold"),
+               strip.text.y = element_text(angle = 0)
+          ))
+      
+}
+
+```
+
+```{r}
+df_t0_gain1 <- df_t0 %>%
+  filter(gain == 1.0)
+```
+```{r fig.height=3, fig.width=4}
+df_t0_gain1 %>%
+  ggplot(aes(ratio, value, ymin=lo, ymax=hi, color=roi, group=roi)) +
+  geom_linerange(show.legend=F) +
+  geom_line(show.legend=F) +
+  geom_point(size=1.5) +
+  labs(x="Ratio of units selective to identity a",
+       y="Simulated PSE variance",
+       color="") +
+  theme_Publication() +
+  theme(legend.direction='vertical',
+        legend.position=c(0.8, 0.8)) +
+  scale_color_brewer(palette='Set1') +
+  coord_cartesian(ylim=c(0, 0.6))
+
+ggsave('img/simdata.png', dpi=300, height=3, width=4)
+```
+```{r}
+# make my own palettes to avoid too light colors
+library(RColorBrewer)
+
+red <- brewer.pal(n=9, "Reds")
+red_palette <- colorRampPalette(c(red[3], red[6], red[9]), space = "Lab")
+my_red <- red_palette(7)
+blue <- brewer.pal(n=9, "Blues")
+blue_palette <- colorRampPalette(c(blue[3], blue[6], blue[9]), space = "Lab")
+my_blue <- blue_palette(7)
+green <- brewer.pal(n=9, "Greens")
+green_palette <- colorRampPalette(c(green[3], green[6], green[9]), space = "Lab")
+my_green <- green_palette(7)
+```
+```{r fig.height=2.25, fig.width=3}
+df_t0_iog <- filter(df_t0, roi == 'IOG')
+df_t0_iog$gain <- as.factor(df_t0_iog$gain)
+
+df_t0_iog %>%
+  ggplot(aes(ratio, value, color=gain, group=gain)) +
+  geom_line(show.legend=F) +
+  geom_point(size=1.5) +
+  labs(x="Ratio of units selective to identity a",
+       y="Simulated PSE variance",
+       color="Gain a/b") +
+  theme_Publication(base_size=10) +
+  theme(legend.direction='vertical',
+        legend.position=c(0.9, 0.65),
+        legend.title=element_text(size=10),
+        legend.key.size=unit(10, 'pt'),
+        legend.text=element_text(size=8)) + 
+  scale_color_manual(values=my_red) +
+  coord_cartesian(ylim=c(0, 0.8))
+
+ggsave('img/simdata_gain_iog.png', dpi=300, height=2.25, width=3.)
+```
+```{r fig.height=2.25, fig.width=3}
+df_t0_pfus <- filter(df_t0, roi == 'pFus')
+df_t0_pfus$gain <- as.factor(df_t0_pfus$gain)
+
+df_t0_pfus %>%
+  ggplot(aes(ratio, value, color=gain, group=gain)) +
+  geom_line(show.legend=F) +
+  geom_point(size=1.5) +
+  labs(x="Ratio of units selective to identity a",
+       y="Simulated PSE variance",
+       color="Gain a/b") +
+  theme_Publication(base_size=10) +
+  theme(legend.direction='vertical',
+        legend.position=c(0.9, 0.65),
+        legend.title=element_text(size=10),
+        legend.key.size=unit(10, 'pt'),
+        legend.text=element_text(size=8)) + 
+  scale_color_manual(values=my_blue) +
+  coord_cartesian(ylim=c(0, 0.8))
+
+ggsave('img/simdata_gain_pfus.png', dpi=300, height=2.25, width=3.)
+```
+
+```{r fig.height=2.25, fig.width=3}
+df_t0_mfus <- filter(df_t0, roi == 'mFus')
+df_t0_mfus$gain <- as.factor(df_t0_mfus$gain)
+
+df_t0_mfus %>%
+  ggplot(aes(ratio, value, color=gain, group=gain)) +
+  geom_line(show.legend=F) +
+  geom_point(size=1.5) +
+  labs(x="Ratio of units selective to identity a",
+       y="Simulated PSE variance",
+       color="Gain a/b") +
+  theme_Publication(base_size=10) +
+  theme(legend.direction='vertical',
+        legend.position=c(0.9, 0.65),
+        legend.title=element_text(size=10),
+        legend.key.size=unit(10, 'pt'),
+        legend.text=element_text(size=8)) + 
+  scale_color_manual(values=my_green) +
+  coord_cartesian(ylim=c(0, 0.8))
+
+ggsave('img/simdata_gain_mfus.png', dpi=300, height=2.25, width=3.)
+```
