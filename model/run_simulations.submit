@@ -1,0 +1,41 @@
+Executable = /usr/bin/singularity
+Universe = vanilla
+RequestMemory = 6000
+RequestCPUs = 16
+getenv = True
+logdir = logs
+output = $(logdir)/$(Cluster)-$(Process).o
+error = $(logdir)/$(Cluster)-$(Process).e
+log = $(logdir)/$(Cluster)-$(Process).log
+
+args = run -e /home/contematto/exp/famretino2/singularity/neuropy36.img python run_simulation_vtcdata.py --nproc 16 --nsim 500
+
+arguments = $(args) --simulation 1
+queue
+
+arguments = $(args) --simulation 2
+queue
+
+arguments = $(args) --simulation 3
+queue
+
+arguments = $(args) --simulation 4
+queue
+
+arguments = $(args) --simulation 5
+queue
+
+arguments = $(args) --simulation 1 --task face
+queue
+
+arguments = $(args) --simulation 2 --task face
+queue
+
+arguments = $(args) --simulation 3 --task face
+queue
+
+arguments = $(args) --simulation 4 --task face
+queue
+
+arguments = $(args) --simulation 5 --task face
+queue
