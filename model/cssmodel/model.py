@@ -4,6 +4,8 @@ Compressive spatial summation in human visual cortex. Journal of
 Neurophysiology (2013). See also http://kendrickkay.net/socmodel"""
 
 import numpy as np
+import matplotlib
+# matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 from matplotlib.patches import Ellipse
 
@@ -178,11 +180,13 @@ class VoxelPopulation(object):
         Arguments
         ---------
         xs : array (n_voxels,)
+            these are assumed to be centered in (0, 0)
         ys : array (n_voxels,)
+            these are assumed to be centered in (0, 0)
         sigmas : array (n_voxels,)
-        gain : float
+        gain : float or array (n_voxels, )
             gain to use in CSS model (default 1.0)
-        n : float
+        n : float or array (n_voxels, )
             exponent for compressive summation (default 0.2)
         res : int
             resolution (default 100)
@@ -191,8 +195,9 @@ class VoxelPopulation(object):
         self.xs = np.asarray(xs) + x0
         self.ys = np.asarray(ys) + y0
         self.sigmas = sigmas
-        self.gain = gain
-        self.n = n
+        self.gain = np.array([gain] * len(xs)) if isinstance(gain, float) \
+            else gain
+        self.n = np.array([n] * len(xs)) if isinstance(n, float) else n
         self.res = res
         self.n_voxels = len(self.xs)
 
@@ -210,8 +215,9 @@ class VoxelPopulation(object):
             the activations for each of the stimuli
         """
         act = []
-        for x, y, s in zip(self.xs, self.ys, self.sigmas):
-            act.append(activation(stim, x, y, s, gain=self.gain, n=self.n,
+        for x, y, s, g, n in zip(self.xs, self.ys, self.sigmas, self.gain,
+                                 self.n):
+            act.append(activation(stim, x, y, s, gain=g, n=n,
                                   res=self.res))
         return np.stack(act).T
 
@@ -265,7 +271,7 @@ def plot_prfs(xs, ys, sigmas, ax=None, res=100, n=0.2):
     sigmas : array (n_voxels, )
     ax : axis
     res : int
-    n : float
+    n : float or array (n_voxels, )
 
     Returns
     -------
@@ -275,6 +281,8 @@ def plot_prfs(xs, ys, sigmas, ax=None, res=100, n=0.2):
     x0 = y0 = res // 2
     xs = np.asarray(xs) + x0
     ys = np.asarray(ys) + y0
+    if isinstance(n, float):
+        n = np.array([n] * len(xs))
     # 4. is 2. for diameters multiplied by 2. for 2sigma
     # normalize by sqrt(n) as in Kay et al., 2015
     widths = 4. * np.asarray(sigmas) / np.sqrt(n)
@@ -373,7 +381,7 @@ def plot_prfdensity(xs, ys, sigmas, n=0.2, res=100, ax=None):
         centers
     sigmas : array (n_voxels)
         std pRfs
-    n : float
+    n : float or array (n_voxels)
         power exponent
     res : int
         size of one of the sides
@@ -387,9 +395,12 @@ def plot_prfdensity(xs, ys, sigmas, n=0.2, res=100, ax=None):
     xs = np.asarray(xs) + x0
     ys = np.asarray(ys) + y0
 
+    if isinstance(n, float):
+        n = np.array([n] * len(xs))
+
     f = np.zeros((res, res))
-    for x, y, s in zip(xs, ys, sigmas):
-        f += filledprf(x, y, s, n=n, res=res)
+    for x, y, s, n_ in zip(xs, ys, sigmas, n):
+        f += filledprf(x, y, s, n=n_, res=res)
     f /= len(xs)
 
     if ax is None:

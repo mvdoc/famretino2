@@ -5,7 +5,7 @@ from sklearn.svm import SVC
 import statsmodels.formula.api as smf
 import statsmodels.api as sm
 from statsmodels.tools.sm_exceptions import PerfectSeparationError
-from model import *
+from .model import *
 
 
 def get_params_pop(mu_ecc, mu_size, cov, n_voxels=10, ratio_voxels=1.,
@@ -72,7 +72,7 @@ def get_params_pop(mu_ecc, mu_size, cov, n_voxels=10, ratio_voxels=1.,
     # get voxel populations
     voxel_pops = {
         s: VoxelPopulation(xs, ys, sigmas, gain=gain_pop[s])
-        for s, (xs, ys, sigmas) in params.iteritems()
+        for s, (xs, ys, sigmas) in params.items()
     }
     return params, voxel_pops
 
@@ -167,7 +167,7 @@ def simulate_experiment(voxel_pops, stimuli, n_trials_stim=10,
     # STEP 1. Generate activations from voxel populations
     # compute activations without noise for each population
     activations = dict()
-    for s, vp in voxel_pops.iteritems():
+    for s, vp in voxel_pops.items():
         activations[s] = vp.activate(stimuli)
 
     # generate training set
@@ -318,3 +318,150 @@ def simulate_bunch_experiments(mu_ecc, mu_size, cov, stimuli, n_sim=100,
         training_scores.append(ts)
         pses.append(pse)
     return pd.concat(df_sim), np.vstack(pses), np.asarray(training_scores)
+
+
+def sample_from_population(roi_params, n_voxels=10, ratio_voxels=1.,
+                           scale_gain=1., increase_rf_size=0.,
+                           res=100, rng=None):
+    """
+    Return parameters for a population of voxels coding for two identities.
+    We're assuming that the population has a total number of voxels
+    `n_voxels`, and that the ratio of voxels being selective for a vs. b is
+    `ratio_voxels`, and the ratio of gain a/b is `ratio_gain`.
+
+    Arguments
+    ---------
+    roi_params : array (5, n_voxels)
+        array containing the five parameters to sample, that is
+        params[0]: row index of pRF center (center must be (0, 0))
+        params[1]: column index of pRF center (center must be (0, 0))
+        params[2]: standard deviation of gaussian (not normalized by n)
+        params[3]: gain parameter
+        params[4]: exponent of power-law non-linearity
+    n_voxels : int
+        total number of voxels
+    ratio_voxels : float
+        proportion of voxels coding for one identity vs. another
+    scale_gain : float
+        this will be multiplied to the gains of the parameters for the
+        first identity. if all gains are set to 1., this is equivalent to
+        increasing the ratio of gains
+    increase_rf_size : float
+        percentage of increase of receptive field size for identity a. For
+        example, 0.05 corresponds to a 5% increase in receptive field size.
+        0. means no increase
+    res : int
+        width of the image in pixel size
+    rng : numpy.RandomState
+        random state
+
+    Returns
+    -------
+    params : dict
+        maps stim -> array (n_voxels, 5) representing x, y, sd size, gain, n
+    voxel_pops : dict
+        maps stim -> VoxelPopulation
+    """
+    if rng is None:
+        rng = np.random.RandomState()
+
+    stims = ['a', 'b']
+    # let's figure out the number of voxels
+    b = int(n_voxels // (1 + ratio_voxels))
+    n_voxels_pop = {
+        'a': n_voxels - b,
+        'b': b
+    }
+
+    n_voxels_roi = roi_params.shape[1]
+    params = {
+        s: roi_params[:, rng.choice(range(n_voxels_roi), n_voxels_pop[s],
+                                    replace=False)]
+        for s in stims
+    }
+    # scale the gains
+    params['a'][3] *= scale_gain
+
+    # increase RF size
+    params['a'][2] += params['a'][2] * increase_rf_size
+
+    # get voxel populations
+    voxel_pops = {
+        s: VoxelPopulation(xs, ys, sigmas, gain=gains, n=ns, res=res)
+        for s, (xs, ys, sigmas, gains, ns) in params.items()
+    }
+    return params, voxel_pops
+
+
+def simulate_bunch_experiments_population(
+        roi_params, stimuli, n_sim=100, n_voxels=10, ratio_voxels=1.0,
+        scale_gain=1.0, increase_rf_size=0., sigma_noise=0.05,
+        res=100, master_seed=234):
+    """
+    Simulate a bunch of experiments sampling from an array of parameters
+
+    Parameters
+    ----------
+    roi_params : array (5, n_voxels)
+        array containing the five parameters to sample, that is
+        params[0]: row index of pRF center (center must be (0, 0))
+        params[1]: column index of pRF center (center must be (0, 0))
+        params[2]: standard deviation of gaussian (not normalized by n)
+        params[3]: gain parameter
+        params[4]: exponent of power-law non-linearity
+    stimuli : array (n_stimuli, res, res)
+        the stimuli used
+    n_sim : int
+        number of simulations to run
+    n_voxels : int
+        number of voxels
+    ratio_voxels : float
+        ratio of voxels responsive to one identity
+    scale_gain : float
+        this will be multiplied to the gains of the parameters for the
+        first identity. if all gains are set to 1., this is equivalent to
+        increasing the ratio of gains
+    increase_rf_size : float
+        percentage of increase of receptive field size for identity a. For
+        example, 0.05 corresponds to a 5% increase in receptive field size.
+        0. means no increase
+    sigma_noise : float
+    res : int
+        width of the image in pixel size
+    master_seed : int
+        master seed used for reproducibility
+
+    Returns
+    -------
+    df : pd.DataFrame
+        dataframe containing all the simulations
+    pses : array (n_sim, n_stimuli)
+        the estimated pses for each simulation
+    training_scores : array (n_sim)
+        training scores for each simulation
+    parameters : list of dict
+        parameters used for every simulation
+    """
+    master_rng = np.random.RandomState(master_seed)
+    rngs = [np.random.RandomState(r)
+            for r in master_rng.randint(2**32, size=n_sim)]
+
+    df_sim = []
+    training_scores = []
+    pses = []
+    parameters = []
+    for i, rng in enumerate(rngs):
+        params, voxel_pops = sample_from_population(
+            roi_params, n_voxels=n_voxels, scale_gain=scale_gain,
+            increase_rf_size=increase_rf_size, ratio_voxels=ratio_voxels,
+            res=res, rng=rng)
+        df, ts = simulate_experiment(voxel_pops, stimuli,
+                                     sigma_noise=sigma_noise)
+        pse = compute_pse(df)
+        df['simulation'] = i
+        df_sim.append(df)
+        training_scores.append(ts)
+        pses.append(pse)
+        parameters.append(params)
+    return (pd.concat(df_sim), np.vstack(pses), np.asarray(training_scores),
+            parameters)
