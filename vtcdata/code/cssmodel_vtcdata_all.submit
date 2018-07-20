@@ -1,0 +1,138 @@
+Executable = /usr/bin/matlab
+Universe = vanilla
+RequestMemory = 6000
+RequestCPUs = 16
+getenv = True
+logdir = logs
+output = $(logdir)/$(Cluster)-$(Process).o
+error = $(logdir)/$(Cluster)-$(Process).e
+log = $(logdir)/$(Cluster)-$(Process).log
+
+args = -nodisplay -singleCompThread
+
+arguments = $(args) -r cssmodel_vtcdata(1,1);exit
+queue
+
+arguments = $(args) -r cssmodel_vtcdata(1,2);exit
+queue
+
+arguments = $(args) -r cssmodel_vtcdata(1,3);exit
+queue
+
+arguments = $(args) -r cssmodel_vtcdata(1,4);exit
+queue
+
+arguments = $(args) -r cssmodel_vtcdata(1,5);exit
+queue
+
+arguments = $(args) -r cssmodel_vtcdata(1,6);exit
+queue
+
+arguments = $(args) -r cssmodel_vtcdata(1,7);exit
+queue
+
+arguments = $(args) -r cssmodel_vtcdata(1,8);exit
+queue
+
+arguments = $(args) -r cssmodel_vtcdata(1,9);exit
+queue
+
+arguments = $(args) -r cssmodel_vtcdata(1,10);exit
+queue
+
+arguments = $(args) -r cssmodel_vtcdata(1,11);exit
+queue
+
+arguments = $(args) -r cssmodel_vtcdata(1,12);exit
+queue
+
+arguments = $(args) -r cssmodel_vtcdata(1,13);exit
+queue
+
+arguments = $(args) -r cssmodel_vtcdata(1,14);exit
+queue
+
+arguments = $(args) -r cssmodel_vtcdata(2,1);exit
+queue
+
+arguments = $(args) -r cssmodel_vtcdata(2,2);exit
+queue
+
+arguments = $(args) -r cssmodel_vtcdata(2,3);exit
+queue
+
+arguments = $(args) -r cssmodel_vtcdata(2,4);exit
+queue
+
+arguments = $(args) -r cssmodel_vtcdata(2,5);exit
+queue
+
+arguments = $(args) -r cssmodel_vtcdata(2,6);exit
+queue
+
+arguments = $(args) -r cssmodel_vtcdata(2,7);exit
+queue
+
+arguments = $(args) -r cssmodel_vtcdata(2,8);exit
+queue
+
+arguments = $(args) -r cssmodel_vtcdata(2,9);exit
+queue
+
+arguments = $(args) -r cssmodel_vtcdata(2,10);exit
+queue
+
+arguments = $(args) -r cssmodel_vtcdata(2,11);exit
+queue
+
+arguments = $(args) -r cssmodel_vtcdata(2,12);exit
+queue
+
+arguments = $(args) -r cssmodel_vtcdata(2,13);exit
+queue
+
+arguments = $(args) -r cssmodel_vtcdata(2,14);exit
+queue
+
+arguments = $(args) -r cssmodel_vtcdata(3,1);exit
+queue
+
+arguments = $(args) -r cssmodel_vtcdata(3,2);exit
+queue
+
+arguments = $(args) -r cssmodel_vtcdata(3,3);exit
+queue
+
+arguments = $(args) -r cssmodel_vtcdata(3,4);exit
+queue
+
+arguments = $(args) -r cssmodel_vtcdata(3,5);exit
+queue
+
+arguments = $(args) -r cssmodel_vtcdata(3,6);exit
+queue
+
+arguments = $(args) -r cssmodel_vtcdata(3,7);exit
+queue
+
+arguments = $(args) -r cssmodel_vtcdata(3,8);exit
+queue
+
+arguments = $(args) -r cssmodel_vtcdata(3,9);exit
+queue
+
+arguments = $(args) -r cssmodel_vtcdata(3,10);exit
+queue
+
+arguments = $(args) -r cssmodel_vtcdata(3,11);exit
+queue
+
+arguments = $(args) -r cssmodel_vtcdata(3,12);exit
+queue
+
+arguments = $(args) -r cssmodel_vtcdata(3,13);exit
+queue
+
+arguments = $(args) -r cssmodel_vtcdata(3,14);exit
+queue
+
