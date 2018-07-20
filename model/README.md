@@ -22,10 +22,7 @@ their data. Used as a sanity check.
 - [run_simulation.ipynb](run_simulation.ipynb): this jupyter notebook
   contains the code used to run a previous version of the simulations. 
 - [run_simulation_vtcdata.ipynb](run_simulation_vtcdata.ipynb): this jupyter notebook
-  contains the code used to run the simulations reported in the paper.
-It uses the parameters estimated from the original data from Kay et al.,
-2015. We also provide a script to run the analyses in parallel, and that
-      script is [run_simulation_vtcdata.py](run_simulation_vtcdata.py).
+  contains the code used to run the simulations reported in the paper.  It uses the parameters estimated from the original data from Kay et al., 2015. We also provide a script to run the analyses in parallel, and that script is [run_simulation_vtcdata.py](run_simulation_vtcdata.py).
 A condor submit file is provided as well.
 - [plot_simdata.Rmd](plot_simdata.Rmd): this RMarkdown notebook is used
   to plot the results of the simulation with changes in gain.
