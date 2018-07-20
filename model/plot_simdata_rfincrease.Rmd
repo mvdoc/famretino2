@@ -1,5 +1,5 @@
 ---
-title: "Plotting modeling results - increase in gain and units"
+title: "Plotting modeling results - increase in RF size"
 output: html_notebook
 ---
 ```{r message=FALSE, warning=FALSE}
@@ -8,14 +8,15 @@ require(tidyverse)
 
 ```{r}
 # task <- 'estimation'  # or 'face'
-task <- 'face'  # or 'face'
-output_fn <- paste('outputs/sim-03_task-', task, '_cis.csv', sep='')
-imgfn <- paste('img/sim-03_task-', task, sep='')
-input_fn <-  paste('outputs/sim-03_task-', task, 
-        '_increase_units_increase_gain_500sim.csv', sep='')
+task <- 'face' 
+output_fn <- paste('outputs/sim-04_task-', task, '_cis.csv', sep='')
+imgfn <- paste('img/sim-04_task-', task, sep='')
+input_fn <-  paste('outputs/sim-04_task-', task, 
+        '_increase_units_increase_rfsize_500sim.csv', sep='')
 df <- read_csv(input_fn)
 df$ratio <- as.factor(df$ratio)
-df <- df %>% group_by(ratio, roi, gain) %>% select(-X1)
+df$rf_increase <- as.factor(df$rf_increase)
+df <- df %>% group_by(ratio, roi, rf_increase) %>% select(-X1)
 ```
 
 # generate bootstrapped values for median and cis
@@ -29,9 +30,9 @@ if (!file.exists(output_fn)) {
   df_bs <- list()
   for (batch in 1:batches) {
     df_batch <- df %>% do(rs=modelr::bootstrap(., nbs_batch)) %>%
-      group_by(ratio, roi, gain) %>%
+      group_by(ratio, roi, rf_increase) %>%
       unnest() %>%
-      group_by(ratio, roi, gain, .id) %>%
+      group_by(ratio, roi, rf_increase, .id) %>%
       do(as.data.frame(.$strap)) %>%
       summarise(value=median(value))
     df_batch$.id <- as.numeric(df_batch$.id) + nbs_batch * (batch - 1)
@@ -45,13 +46,13 @@ if (!file.exists(output_fn)) {
   cis <-
   df_bs %>%
     ungroup() %>%
-    group_by(ratio, roi, gain) %>%
+    group_by(ratio, roi, rf_increase) %>%
     summarise(lo=quantile(value, l_ci),
               hi=quantile(value, h_ci))
   
   df_t0 <-
     df %>%
-    group_by(ratio, roi, gain) %>%
+    group_by(ratio, roi, rf_increase) %>%
     summarise(value=median(value))
   
   df_t0 <-
@@ -100,8 +101,8 @@ theme_Publication <- function(base_size=12) {
 ```
 
 ```{r}
-df_t0_gain1 <- df_t0 %>%
-  filter(gain == 1.0)
+df_t0_rfi0 <- df_t0 %>%
+  filter(rf_increase == 0)
 
 if (task == 'estimation') {
   y_lims <- c(0, 1.25)
@@ -110,7 +111,7 @@ if (task == 'estimation') {
 }
 ```
 ```{r fig.height=3, fig.width=4}
-df_t0_gain1 %>%
+df_t0_rfi0 %>%
   ggplot(aes(ratio, value, ymin=lo, ymax=hi, color=roi, group=roi)) +
   geom_linerange(show.legend=F) +
   geom_line(show.legend=F) +
@@ -124,8 +125,8 @@ df_t0_gain1 %>%
   scale_color_brewer(palette='Set1') +
   coord_cartesian(ylim=y_lims)
 
-img <- paste(imgfn, '_data.png', sep='')
-ggsave(img, dpi=300, height=3, width=4)
+#img <- paste(imgfn, '_data.png', sep='')
+#ggsave(img, dpi=300, height=3, width=4)
 ```
 ```{r}
 # make my own palettes to avoid too light colors
@@ -143,71 +144,74 @@ my_green <- green_palette(7)
 ```
 ```{r fig.height=2.25, fig.width=3}
 df_t0_iog <- filter(df_t0, roi == 'IOG')
-df_t0_iog$gain <- as.factor(df_t0_iog$gain)
+df_t0_iog$rf_increase <- as.numeric(as.character(df_t0_iog$rf_increase)) * 100
+df_t0_iog$rf_increase <- as.factor(df_t0_iog$rf_increase)
 
 df_t0_iog %>%
-  ggplot(aes(ratio, value, color=gain, group=gain)) +
+  ggplot(aes(ratio, value, color=rf_increase, group=rf_increase)) +
   geom_line(show.legend=F) +
   geom_point(size=1.5) +
   labs(x="Ratio of units selective to identity a",
        y="Simulated PSE variance",
-       color="Gain a/b") +
+       color="RF increase [%]") +
   theme_Publication(base_size=10) +
   theme(legend.direction='vertical',
-        legend.position=c(0.9, 0.65),
+        legend.position=c(0.8, 0.8),
         legend.title=element_text(size=10),
         legend.key.size=unit(10, 'pt'),
         legend.text=element_text(size=8)) + 
   scale_color_manual(values=my_red) +
   coord_cartesian(ylim=y_lims)
 
-img <- paste(imgfn, '_increase-gain_iog.png', sep='')
+img <- paste(imgfn, '_increase-rfsize_iog.png', sep='')
 ggsave(img, dpi=300, height=2.25, width=3.)
 ```
 ```{r fig.height=2.25, fig.width=3}
 df_t0_pfus <- filter(df_t0, roi == 'pFus')
-df_t0_pfus$gain <- as.factor(df_t0_pfus$gain)
+df_t0_pfus$rf_increase <- as.numeric(as.character(df_t0_pfus$rf_increase)) * 100
+df_t0_pfus$rf_increase <- as.factor(df_t0_pfus$rf_increase)
 
 df_t0_pfus %>%
-  ggplot(aes(ratio, value, color=gain, group=gain)) +
+  ggplot(aes(ratio, value, color=rf_increase, group=rf_increase)) +
   geom_line(show.legend=F) +
   geom_point(size=1.5) +
   labs(x="Ratio of units selective to identity a",
        y="Simulated PSE variance",
-       color="Gain a/b") +
+       color="RF increase [%]") +
   theme_Publication(base_size=10) +
   theme(legend.direction='vertical',
-        legend.position=c(0.9, 0.65),
+        legend.position=c(0.8, 0.8),
         legend.title=element_text(size=10),
         legend.key.size=unit(10, 'pt'),
         legend.text=element_text(size=8)) + 
   scale_color_manual(values=my_blue) +
   coord_cartesian(ylim=y_lims)
 
-img <- paste(imgfn, '_increase-gain_pfus.png', sep='')
+img <- paste(imgfn, '_increase-rfsize_pfus.png', sep='')
 ggsave(img, dpi=300, height=2.25, width=3.)
 ```
 
 ```{r fig.height=2.25, fig.width=3}
 df_t0_mfus <- filter(df_t0, roi == 'mFus')
-df_t0_mfus$gain <- as.factor(df_t0_mfus$gain)
+df_t0_mfus$rf_increase <- as.numeric(as.character(df_t0_mfus$rf_increase)) * 100
+df_t0_mfus$rf_increase <- as.factor(df_t0_mfus$rf_increase)
 
 df_t0_mfus %>%
-  ggplot(aes(ratio, value, color=gain, group=gain)) +
+  ggplot(aes(ratio, value, color=rf_increase, group=rf_increase)) +
   geom_line(show.legend=F) +
   geom_point(size=1.5) +
   labs(x="Ratio of units selective to identity a",
        y="Simulated PSE variance",
-       color="Gain a/b") +
+       color="RF increase [%]") +
   theme_Publication(base_size=10) +
   theme(legend.direction='vertical',
-        legend.position=c(0.9, 0.65),
+        legend.position=c(0.8, 0.8),
         legend.title=element_text(size=10),
         legend.key.size=unit(10, 'pt'),
         legend.text=element_text(size=8)) + 
   scale_color_manual(values=my_green) +
   coord_cartesian(ylim=y_lims)
 
-img <- paste(imgfn, '_increase-gain_mfus.png', sep='')
+img <- paste(imgfn, '_increase-rfsize_mfus.png', sep='')
 ggsave(img, dpi=300, height=2.25, width=3.)
 ```
