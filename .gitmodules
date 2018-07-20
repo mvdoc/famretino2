@@ -1,0 +1,3 @@
+[submodule "vtcdata/code/knkutils"]
+	path = vtcdata/code/knkutils
+	url = https://github.com/kendrickkay/knkutils.git
