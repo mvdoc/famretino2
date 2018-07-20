@@ -9,9 +9,11 @@ specific subjects and ROIs. A Condor submit file is available to run the
 computation in parallel on a cluster.
 
 The derivative data (model parameters) are saved in the `output`
-directory. 
+directory. Since they are rather big, they are provided in the OSF
+repository available
+[here](https://osf.io/wdaxs/?view_only=28741ad9b640480a9af6b593ade1ebcf).
 
-Additional analyses are run in Python. 
+Additional analyses are run in Python, see under `../model`.
 
 Please check the README file under `code` for more information.
 
