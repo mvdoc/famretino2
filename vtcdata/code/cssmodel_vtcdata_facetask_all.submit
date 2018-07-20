@@ -1,0 +1,138 @@
+Executable = /usr/bin/matlab
+Universe = vanilla
+RequestMemory = 6000
+RequestCPUs = 16
+getenv = True
+logdir = logs
+output = $(logdir)/$(Cluster)-$(Process).o
+error = $(logdir)/$(Cluster)-$(Process).e
+log = $(logdir)/$(Cluster)-$(Process).log
+
+args = -nodisplay -singleCompThread
+
+arguments = $(args) -r cssmodel_vtcdata_facetask(1,1);exit
+queue
+
+arguments = $(args) -r cssmodel_vtcdata_facetask(1,2);exit
+queue
+
+arguments = $(args) -r cssmodel_vtcdata_facetask(1,3);exit
+queue
+
+arguments = $(args) -r cssmodel_vtcdata_facetask(1,4);exit
+queue
+
+arguments = $(args) -r cssmodel_vtcdata_facetask(1,5);exit
+queue
+
+arguments = $(args) -r cssmodel_vtcdata_facetask(1,6);exit
+queue
+
+arguments = $(args) -r cssmodel_vtcdata_facetask(1,7);exit
+queue
+
+arguments = $(args) -r cssmodel_vtcdata_facetask(1,8);exit
+queue
+
+arguments = $(args) -r cssmodel_vtcdata_facetask(1,9);exit
+queue
+
+arguments = $(args) -r cssmodel_vtcdata_facetask(1,10);exit
+queue
+
+arguments = $(args) -r cssmodel_vtcdata_facetask(1,11);exit
+queue
+
+arguments = $(args) -r cssmodel_vtcdata_facetask(1,12);exit
+queue
+
+arguments = $(args) -r cssmodel_vtcdata_facetask(1,13);exit
+queue
+
+arguments = $(args) -r cssmodel_vtcdata_facetask(1,14);exit
+queue
+
+arguments = $(args) -r cssmodel_vtcdata_facetask(2,1);exit
+queue
+
+arguments = $(args) -r cssmodel_vtcdata_facetask(2,2);exit
+queue
+
+arguments = $(args) -r cssmodel_vtcdata_facetask(2,3);exit
+queue
+
+arguments = $(args) -r cssmodel_vtcdata_facetask(2,4);exit
+queue
+
+arguments = $(args) -r cssmodel_vtcdata_facetask(2,5);exit
+queue
+
+arguments = $(args) -r cssmodel_vtcdata_facetask(2,6);exit
+queue
+
+arguments = $(args) -r cssmodel_vtcdata_facetask(2,7);exit
+queue
+
+arguments = $(args) -r cssmodel_vtcdata_facetask(2,8);exit
+queue
+
+arguments = $(args) -r cssmodel_vtcdata_facetask(2,9);exit
+queue
+
+arguments = $(args) -r cssmodel_vtcdata_facetask(2,10);exit
+queue
+
+arguments = $(args) -r cssmodel_vtcdata_facetask(2,11);exit
+queue
+
+arguments = $(args) -r cssmodel_vtcdata_facetask(2,12);exit
+queue
+
+arguments = $(args) -r cssmodel_vtcdata_facetask(2,13);exit
+queue
+
+arguments = $(args) -r cssmodel_vtcdata_facetask(2,14);exit
+queue
+
+arguments = $(args) -r cssmodel_vtcdata_facetask(3,1);exit
+queue
+
+arguments = $(args) -r cssmodel_vtcdata_facetask(3,2);exit
+queue
+
+arguments = $(args) -r cssmodel_vtcdata_facetask(3,3);exit
+queue
+
+arguments = $(args) -r cssmodel_vtcdata_facetask(3,4);exit
+queue
+
+arguments = $(args) -r cssmodel_vtcdata_facetask(3,5);exit
+queue
+
+arguments = $(args) -r cssmodel_vtcdata_facetask(3,6);exit
+queue
+
+arguments = $(args) -r cssmodel_vtcdata_facetask(3,7);exit
+queue
+
+arguments = $(args) -r cssmodel_vtcdata_facetask(3,8);exit
+queue
+
+arguments = $(args) -r cssmodel_vtcdata_facetask(3,9);exit
+queue
+
+arguments = $(args) -r cssmodel_vtcdata_facetask(3,10);exit
+queue
+
+arguments = $(args) -r cssmodel_vtcdata_facetask(3,11);exit
+queue
+
+arguments = $(args) -r cssmodel_vtcdata_facetask(3,12);exit
+queue
+
+arguments = $(args) -r cssmodel_vtcdata_facetask(3,13);exit
+queue
+
+arguments = $(args) -r cssmodel_vtcdata_facetask(3,14);exit
+queue
+
