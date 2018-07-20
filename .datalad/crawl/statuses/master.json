@@ -1,0 +1,40 @@
+{
+  "db_version": 1,
+  "files": {
+    "conimages.mat": {
+      "filename": "conimages.mat",
+      "mtime": 1419887079,
+      "size": 11930700
+    },
+    "dataset01.mat": {
+      "filename": "dataset01.mat",
+      "mtime": 1419945656,
+      "size": 842073722
+    },
+    "dataset01_t1.nii.gz": {
+      "filename": "dataset01_t1.nii.gz",
+      "mtime": 1419885574,
+      "size": 11004095
+    },
+    "dataset02.mat": {
+      "filename": "dataset02.mat",
+      "mtime": 1419945662,
+      "size": 1115156662
+    },
+    "dataset02_t1.nii.gz": {
+      "filename": "dataset02_t1.nii.gz",
+      "mtime": 1419885540,
+      "size": 11408995
+    },
+    "dataset03.mat": {
+      "filename": "dataset03.mat",
+      "mtime": 1419945669,
+      "size": 991182534
+    },
+    "dataset03_t1.nii.gz": {
+      "filename": "dataset03_t1.nii.gz",
+      "mtime": 1419885580,
+      "size": 11839649
+    }
+  }
+}
