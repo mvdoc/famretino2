@@ -11,7 +11,9 @@ version is already present in the directory that can be inspected using
 a regular browser.
 
 Simulations are provided as Jupyter notebook. Please read the README.md
-file in the model directory for more information.
+file in the model directory for more information. The simulations were
+run using the singularity image for which we provide the definition file
+in the directory `singularity`.
 
 This repository uses [packrat](https://rstudio.github.io/packrat/) to
 track dependencies. If you open RStudio to the top directory of this
