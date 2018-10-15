@@ -1,10 +1,9 @@
 # Idiosyncratic, retinotopic bias in face identification modulated by familiarity
 
-This repository contains the analysis scripts, raw data, and simulations  for
+This repository contains the analysis scripts, raw data, and simulations for
 *Idiosyncratic, retinotopic bias in face identification modulated by
 personal familiarity* by Matteo Visconti di Oleggio Castello, Morgan
-Taylor, Patrick Cavanagh, and M. Ida Gobbini. A preprint is available
-on [bioRxiv](https://www.biorxiv.org/content/early/2018/01/26/253468).
+Taylor, Patrick Cavanagh, and M. Ida Gobbini published on *eNeuro*: https://doi.org/10.1523/ENEURO.0054-18.2018.
 
 All the analysis are provided as RMarkdown notebooks; a converted HTML
 version is already present in the directory that can be inspected using
